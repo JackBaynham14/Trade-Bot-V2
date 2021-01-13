@@ -14,4 +14,6 @@ Simple Moving Average Crossovers:
 
 Picking Moving Averages:
     The program aims to generate optimum signals by only using moving average pairs that resulted
-    in the best buy and sell signals recently.
+    in the best buy and sell signals recently. A pair is considered to have the best signals by
+    having the largest spread between average sell price and average buy price, with average sell
+    being above the average buy.
