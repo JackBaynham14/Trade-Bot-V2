@@ -17,7 +17,7 @@ def tradeBot(dataFile, minLength=1, maxLength=100):
     assert maxLength > minLength
 
     # Load closing price data into array
-    data = loadData(dataFile, minLength, maxLength)
+    data, dates = loadData(dataFile, maxLength)
 
     # Initialize running best pair values
     bestPair = [1, 2]
@@ -28,9 +28,11 @@ def tradeBot(dataFile, minLength=1, maxLength=100):
         slowLength += 1
 
         # Find values for slow moving average
+        slowValues = findMovAvgValues(data, slowLength)
 
         for fastLength in range(minLength, slowLength):
             # Find values for fast moving average
+            fastValues = findMovAvgValues(data, fastLength)
 
             # Find crossovers
 
@@ -53,9 +55,8 @@ def loadData(dataFile, maxLength):
     '''
     # Input validation
     assert os.path.isfile(dataFile)
-    assert maxLength > minLength
 
-    closingData = []
+    data = []
     dates = []
 
     with open(dataFile, 'r') as file:
@@ -68,17 +69,25 @@ def loadData(dataFile, maxLength):
         # Iterate over each line to save the date and closing price
         for line in lines[1:]:
             line = line.split(',')
-            closingData.append(float(line[4]))
+            data.append(round(float(line[4]), 2))
             dates.append(line[0])
 
-    return data[-maxLength:]
+    return data[-maxLength:], dates[-maxLength:]
 
 def findMovAvgValues(data, length):
     '''
     Finds the values of a moving average
     '''
+    # Input validation
+    assert len(data) >= length
 
-    pass
+    values = []
+
+    # Iterate over valid periods and find the value of the average
+    for i in range(length, len(data)+1):
+        values.append(round(sum(data[i:i+length]) / length, 2))
+    
+    return values
 
 def findCrossovers(fastValues, slowValues):
     '''
@@ -95,4 +104,4 @@ def findPerformance(data, crossovers):
     pass
 
 #Program testing
-tradeBot('Data/TMHC.csv')
+print(findMovAvgValues([1, 2, 1, 2, 1, 2], 3))
