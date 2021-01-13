@@ -20,3 +20,9 @@ TradeBot:
         Returns the difference between the average price at each sell signal and the average price
         at each buy signal. Sell signals are downside crossovers (-1), and buy signals are upside
         crossovers (1).
+
+Testing:
+    Summary:
+        This module is used for testing the performance of TradeBot. It grabs historical price data
+        and pretends to run it every day for a set period of time, saving the output trades and
+        analyzing how much an account would change as a result of making those trades.
