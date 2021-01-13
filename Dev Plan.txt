@@ -1,0 +1,22 @@
+TradeBot:
+    Summary:
+        This module generates actual signals to be used when run. It also provides additional
+        additional information when run such as the selected moving averages and the performance
+        of those averages. It accepts as input the filename for the price data.
+    tradeBot(filename):
+        Main function which calls helper functions to analyze the input data and outputs signals
+        and other relevant information.
+    loadData(filename):
+        Loads in and transforms input data to be used by the rest of the program. It also performs
+        input validation on the data itself.
+    generateMovAvgs(array):
+        Returns an array of moving average values for the input array.
+    findCrossovers(primaryArray, secondaryArray):
+        Returns an array equal in length to the shortest of the two input arrays consisting on 0s,
+        1s, and -1s. A 1 indicates the primaryArray crossed above the secondaryArray at that
+        index, a -1 indicates the primaryArray crossed below the secondaryArray at that index,
+        and a 0 indicates there was no crossover at the index.
+    analyzePerformance(priceData, crossovers):
+        Returns the difference between the average price at each sell signal and the average price
+        at each buy signal. Sell signals are downside crossovers (-1), and buy signals are upside
+        crossovers (1).
