@@ -3,11 +3,12 @@ This program generates a buy or sell signal for the latest period in the input p
 '''
 import os
 
-def tradeBot(dataFile, minLength=1, maxLength=100):
+def tradeBot(dataFile, testLength=90, minLength=1, maxLength=100):
     '''
     Main function which calls helper functions to analyze data and generate trade signals
     Inputs:
         - dataFile: filename for input price data
+        - testLength: number of periods to test for best pair
         - minPeriod: smallest period length to test
         - maxPeriod: largest period length to test
     Outputs:
@@ -17,9 +18,16 @@ def tradeBot(dataFile, minLength=1, maxLength=100):
     assert maxLength > minLength
 
     # Load closing price data into array
-    data, dates = loadData(dataFile, maxLength)
+    data, dates = loadData(dataFile)
 
-    # Initialize running best pair values
+    # Check for sufficient amount of data and remove extra data
+    assert len(data) > (testLength + maxLength - 1)
+    data = data[-(testLength + maxLength - 1):]
+
+    print(data)
+    print(len(data))
+
+    # Initialize current best pair values
     bestPair = [1, 2]
     bestPairScore = 0
 
@@ -27,14 +35,15 @@ def tradeBot(dataFile, minLength=1, maxLength=100):
     for slowLength in range(minLength, maxLength):
         slowLength += 1
 
-        # Find values for slow moving average
+        # Find values for slow moving average and remove extra values
         slowValues = findMovAvgValues(data, slowLength)
 
         for fastLength in range(minLength, slowLength):
-            # Find values for fast moving average
+            # Find values for fast moving average and remove extra values
             fastValues = findMovAvgValues(data, fastLength)
 
             # Find crossovers
+            crossovers = findCrossovers(fastValues, slowValues)
 
             # Calculate performance
 
@@ -46,7 +55,7 @@ def tradeBot(dataFile, minLength=1, maxLength=100):
     # Return crossover if present and information about the best pair
     return
 
-def loadData(dataFile, maxLength):
+def loadData(dataFile):
     '''
     Load closing price data from file, validate the format, and return an array of closing prices
     Inputs:
@@ -64,7 +73,6 @@ def loadData(dataFile, maxLength):
 
         # Check file format
         assert lines[0] == 'Date,Open,High,Low,Close,Adj Close,Volume\n'
-        assert len(lines) > maxLength
 
         # Iterate over each line to save the date and closing price
         for line in lines[1:]:
@@ -72,7 +80,7 @@ def loadData(dataFile, maxLength):
             data.append(round(float(line[4]), 2))
             dates.append(line[0])
 
-    return data[-maxLength:], dates[-maxLength:]
+    return data, dates
 
 def findMovAvgValues(data, length):
     '''
@@ -93,8 +101,15 @@ def findCrossovers(fastValues, slowValues):
     '''
     Finds crossovers of the fast values crossing the slow values
     '''
+    # Input validation
+    assert len(fastValues) > len(slowValues)
 
-    pass
+    fastValues = fastValues[-(len(slowValues)-1):]
+
+    crossovers = []
+
+    for i in range(len(fastValues)):
+        pass
 
 def findPerformance(data, crossovers):
     '''
@@ -104,4 +119,4 @@ def findPerformance(data, crossovers):
     pass
 
 #Program testing
-print(findMovAvgValues([1, 2, 1, 2, 1, 2], 3))
+tradeBot('Data/TMHC.csv', testLength=10, maxLength=5)
