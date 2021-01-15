@@ -6,9 +6,6 @@ TradeBot:
     tradeBot(filename):
         Main function which calls helper functions to analyze the input data and outputs signals
         and other relevant information.
-    loadData(filename):
-        Loads in and transforms input data to be used by the rest of the program. It also performs
-        input validation on the data itself.
     generateMovAvgs(array):
         Returns an array of moving average values for the input array.
     findCrossovers(primaryArray, secondaryArray):
@@ -26,3 +23,6 @@ Testing:
         This module is used for testing the performance of TradeBot. It grabs historical price data
         and pretends to run it every day for a set period of time, saving the output trades and
         analyzing how much an account would change as a result of making those trades.
+    loadData(filename):
+        Loads in and transforms input data to be used by the rest of the program. It also performs
+        input validation on the data itself.
