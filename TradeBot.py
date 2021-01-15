@@ -3,7 +3,7 @@ This program generates a buy or sell signal for the latest period in the input p
 '''
 import os
 
-def tradeBot(dataFile, testLength=90, minLength=1, maxLength=100):
+def tradeBot(dataFile, testLength=90, minLength=1, maxLength=100, logs=False):
     '''
     Main function which calls helper functions to analyze data and generate trade signals
     Inputs:
@@ -11,8 +11,9 @@ def tradeBot(dataFile, testLength=90, minLength=1, maxLength=100):
         - testLength: number of periods to test for best pair
         - minPeriod: smallest period length to test
         - maxPeriod: largest period length to test
+        - logs: show or hid debugging information
     Outputs:
-        - string containing a signal if present and information about the used moving averages
+        - tuple containing a signal if present and information about the used moving averages
     '''
     # Input validation
     assert maxLength > minLength
@@ -24,36 +25,44 @@ def tradeBot(dataFile, testLength=90, minLength=1, maxLength=100):
     assert len(data) > (testLength + maxLength - 1)
     data = data[-(testLength + maxLength - 1):]
 
-    print(data)
-    print(len(data))
-
     # Initialize current best pair values
     bestPair = [1, 2]
-    bestPairScore = 0
+    bestPairPerformance = 0
 
     # Iterate through every allowed moving average pair
     for slowLength in range(minLength, maxLength):
         slowLength += 1
 
-        # Find values for slow moving average and remove extra values
+        # Find values for slow moving average
         slowValues = findMovAvgValues(data, slowLength)
 
         for fastLength in range(minLength, slowLength):
             # Find values for fast moving average and remove extra values
             fastValues = findMovAvgValues(data, fastLength)
+            fastValues = fastValues[-len(slowValues):]
 
             # Find crossovers
             crossovers = findCrossovers(fastValues, slowValues)
 
             # Calculate performance
+            performance = findPerformance(data[-len(crossovers):], crossovers)
 
             # Update current bestPair/bestPairScore if better
-            pass
+            if performance > bestPairPerformance:
+                bestPair = [fastLength, slowLength]
+                bestPairPerformance = performance
+
+            if fastLength % 10 == 0 and logs:
+                print(f'{fastLength:3}, {slowLength:3}, {bestPairPerformance:3.2f}, {bestPair}')
     
     # Check for crossover of best pair in most recent period
+    fastValues = findMovAvgValues(data[-(bestPair[0]+1):], bestPair[0])
+    slowValues = findMovAvgValues(data[-(bestPair[1]+1):], bestPair[1])
+    
+    crossover = findCrossovers(fastValues, slowValues)
 
     # Return crossover if present and information about the best pair
-    return
+    return crossover[1], data[-1], bestPair, bestPairPerformance
 
 def loadData(dataFile):
     '''
@@ -165,7 +174,4 @@ def findPerformance(data, crossovers):
     avgSell = sum(sells) / len(sells)
     avgProfit = avgSell - avgBuy
 
-    return avgProfit, avgBuy, avgSell
-
-#Program testing
-tradeBot('Data/TMHC.csv', testLength=10, maxLength=5)
+    return avgProfit
