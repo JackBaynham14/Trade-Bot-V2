@@ -85,8 +85,15 @@ def loadData(dataFile):
 def findMovAvgValues(data, length):
     '''
     Finds the values of a moving average
+    Inputs:
+        - data: Price data as an array
+        - length: Length of moving average to calculate for all valid periods
+    Outpus:
+        - list containing the moving average values for the data and length
     '''
     # Input validation
+    assert isinstance(data, list)
+    assert isinstance(length, int)
     assert len(data) >= length
 
     values = []
@@ -100,23 +107,65 @@ def findMovAvgValues(data, length):
 def findCrossovers(fastValues, slowValues):
     '''
     Finds crossovers of the fast values crossing the slow values
+    Inputs:
+        - fastValues: array of values values that crossover the slowValues
+        - slowValues: array of values that are crossovered by the fastValues
+    Outputs:
+        - array of crossover at each period (0, 1, -1)
     '''
     # Input validation
-    assert len(fastValues) > len(slowValues)
+    assert isinstance(fastValues, list)
+    assert isinstance(slowValues, list)
+    assert len(fastValues) == len(slowValues)
+    assert len(fastValues) > 1
 
-    fastValues = fastValues[-(len(slowValues)-1):]
+    crossovers = [0]
 
-    crossovers = []
+    # Iterate over each period and add crossover status
+    for i in range(1, len(fastValues)):
+        prevDif = fastValues[i-1] - slowValues[i-1]
+        newDif = fastValues[i] - slowValues[i]
 
-    for i in range(len(fastValues)):
-        pass
+        # Check if signs changed
+        if prevDif > 0 and newDif < 0:
+            crossovers.append(-1)
+        elif prevDif < 0 and newDif > 0:
+            crossovers.append(1)
+        else:
+            crossovers.append(0)
+    
+    return crossovers
 
 def findPerformance(data, crossovers):
     '''
     Finds average sell and buy prices and returns the difference
+    Inputs:
+        - data: price data used to determine price at trade signals
+        - crossovers: list of crossover locations and types
+    Outputs:
+        - Average buy and sell prices
     '''
+    # Input validation
+    assert isinstance(data, list)
+    assert isinstance(crossovers, list)
+    assert len(data) == len(crossovers)
 
-    pass
+    buys = []
+    sells = []
+
+    # Iterate over each period and add appropriate trades
+    for i in range(len(data)):
+        if crossovers[i] == 1:
+            buys.append(data[i])
+        elif crossovers[i] == -1:
+            sells.append(data[i])
+    
+    # Calculate average buy, sell, and profit
+    avgBuy = sum(buys) / len(buys)
+    avgSell = sum(sells) / len(sells)
+    avgProfit = avgSell - avgBuy
+
+    return avgProfit, avgBuy, avgSell
 
 #Program testing
 tradeBot('Data/TMHC.csv', testLength=10, maxLength=5)
